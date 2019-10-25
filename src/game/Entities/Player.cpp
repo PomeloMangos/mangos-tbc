@@ -72,6 +72,7 @@
 #include "Pomelo/InitPlayerItemMgr.h"
 #include "Pomelo/VendorItemBlacklistMgr.h"
 #include "Pomelo/OnlineRewardMgr.h"
+#include "Globals/ObjectMgr.h"
 
 #ifdef BUILD_PLAYERBOT
 #include "PlayerBot/Base/PlayerbotAI.h"
@@ -2744,6 +2745,9 @@ void Player::GiveLevel(uint32 level)
 
     // resend quests status directly
     SendQuestGiverStatusMultiple();
+
+    if (sDBConfigMgr.GetUInt32("autolearnspellonlevelup"))
+        this->LearnSpellsWhenLevelup();
 }
 
 void Player::UpdateFreeTalentPoints(bool resetIfNeed)
@@ -3588,6 +3592,7 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bo
     {
         uint32 freeProfs = GetFreePrimaryProfessionPoints() + 1;
         uint32 maxProfs = GetSession()->GetSecurity() < AccountTypes(sWorld.getConfig(CONFIG_UINT32_TRADE_SKILL_GMIGNORE_MAX_PRIMARY_COUNT)) ? sWorld.getConfig(CONFIG_UINT32_MAX_PRIMARY_TRADE_SKILL) : 10;
+        maxProfs += GetAdditionalTradeSkills();
         if (freeProfs <= maxProfs)
             SetFreePrimaryProfessions(freeProfs);
     }
@@ -14975,6 +14980,9 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     // Pomelo soldier
     m_maxSoldier = fields[63].GetUInt8();
 
+    // Pomelo misc
+    m_addTradeSkills = fields[64].GetUInt32();
+
     // cleanup inventory related item value fields (its will be filled correctly in _LoadInventory)
     for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
     {
@@ -19377,6 +19385,7 @@ void Player::InitPrimaryProfessions()
 {
     uint32 maxProfs = GetSession()->GetSecurity() < AccountTypes(sWorld.getConfig(CONFIG_UINT32_TRADE_SKILL_GMIGNORE_MAX_PRIMARY_COUNT))
                       ? sWorld.getConfig(CONFIG_UINT32_MAX_PRIMARY_TRADE_SKILL) : 10;
+    maxProfs += GetAdditionalTradeSkills();
     SetFreePrimaryProfessions(maxProfs);
 }
 
@@ -22072,4 +22081,86 @@ bool Player::ModifyCurrency(uint32 curid, int32 amount)
 std::vector<CustomCurrencyOwnedPair> Player::GetOwnedCustomCurrencies()
 {
 	return sCustomCurrencyMgr.GetOwnedCurrencies(GetSession()->GetAccountId());
+}
+
+const uint32 trainer_ids[] = 
+{
+    80030, // Weapons
+    80007, // Ride
+};
+
+bool Player::IsAlliance()
+{
+    uint8 race = getRace();
+    return race == 1 || race == 3 || race == 4 || race == 7 || race == 11;
+}
+
+void Player::LearnAllGreenSpells(uint32 trainerId, size_t nonGreenCount)
+{
+    TrainerSpellData const* spells = sObjectMgr.GetNpcTrainerTemplateSpells(trainerId);
+    if (!spells) return;
+    size_t non_green = 0;
+    for (const auto& itr : spells->spellList)
+    {
+        TrainerSpell const* tSpell = &itr.second;
+
+        uint32 reqLevel = 0;
+        if (!this->IsSpellFitByClassAndRace(tSpell->learnedSpell, &reqLevel))
+            continue;
+
+        if (tSpell->conditionId && !sObjectMgr.IsPlayerMeetToCondition(tSpell->conditionId, this, this->GetMap(), this, CONDITION_FROM_TRAINER))
+            continue;
+
+        reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
+
+        TrainerSpellState state = this->GetTrainerSpellState(tSpell, reqLevel);
+
+        if (state == TrainerSpellState::TRAINER_SPELL_GREEN)
+        {
+            this->learnSpell(itr.first, false);
+        }
+        else
+        {
+            ++non_green;
+        }
+    }
+
+    if (non_green == nonGreenCount)
+        return;
+    else
+        LearnAllGreenSpells(trainerId, non_green);
+}
+
+void Player::LearnSpellsWhenLevelup()
+{
+    uint8 classId = this->getClass();
+    uint32 npcId = sDBConfigMgr.GetUInt32("trainer." + std::to_string(classId));
+    LearnAllGreenSpells(npcId);
+
+    // Hardcode for shamman temporarily
+    if (classId == 7)
+    {
+        uint32 level = getLevel();
+        if (level == 5)
+        {
+            ChatHandler(this).HandleAddItemCommandInternal("5175", true);
+        }
+        else if (level == 10)
+        {
+            ChatHandler(this).HandleAddItemCommandInternal("5176", true);
+        }
+        else if (level == 20)
+        {
+            ChatHandler(this).HandleAddItemCommandInternal("5177", true);
+        }
+        else if (level == 30)
+        {
+            ChatHandler(this).HandleAddItemCommandInternal("5178", true);
+        }
+    }
+
+    for (uint32 i : trainer_ids)
+    {
+        LearnAllGreenSpells(i);
+    }
 }

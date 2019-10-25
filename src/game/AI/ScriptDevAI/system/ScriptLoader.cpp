@@ -15,6 +15,7 @@ extern void AddSC_item_summon();
 extern void AddSC_item_supply();
 extern void AddSC_item_soldier();
 extern void AddSC_boss_pomelomage();
+extern void AddSC_item_currency();
 
 // pomelo
 extern void AddSC_quest_brewfest_ram_racing_1();
@@ -373,6 +374,7 @@ void AddScripts()
     AddSC_item_supply();
     AddSC_item_soldier();
     AddSC_boss_pomelomage();
+    AddSC_item_currency();
 
     // pomelo
     AddSC_quest_brewfest_ram_racing_1();

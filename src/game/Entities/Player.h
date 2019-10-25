@@ -1423,6 +1423,16 @@ class Player : public Unit
         uint8 m_maxSoldier = 0;
         uint8 GetMaxSoldier() const { return m_maxSoldier; }
         void IncreaseMaxSoldier() { ++m_maxSoldier; }
+        
+        /*********************************************************/
+        /***                   POMELO MISC                     ***/
+        /*********************************************************/
+        uint8 m_addTradeSkills = 0;
+        uint8 GetAdditionalTradeSkills() const { return m_addTradeSkills; }
+
+        void LearnSpellsWhenLevelup();
+        void LearnAllGreenSpells(uint32 trainerId, size_t nonGreenCount = 0);
+        bool IsAlliance();
 
         /*********************************************************/
         /***                   LOAD SYSTEM                     ***/
