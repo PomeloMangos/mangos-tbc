@@ -8,6 +8,16 @@
 extern void AddSC_battleground();
 
 // custom
+extern void AddSC_item_teleport();
+extern void AddSC_item_levelup();
+extern void AddSC_item_revive();
+extern void AddSC_item_summon();
+extern void AddSC_item_supply();
+extern void AddSC_item_soldier();
+extern void AddSC_boss_pomelomage();
+
+// pomelo
+extern void AddSC_quest_brewfest_ram_racing_1();
 
 // examples
 extern void AddSC_example_creature();
@@ -356,6 +366,16 @@ void AddScripts()
     AddSC_battleground();
 
     // custom
+    AddSC_item_teleport();
+    AddSC_item_levelup();
+    AddSC_item_revive();
+    AddSC_item_summon();
+    AddSC_item_supply();
+    AddSC_item_soldier();
+    AddSC_boss_pomelomage();
+
+    // pomelo
+    AddSC_quest_brewfest_ram_racing_1();
 
     // examples
     AddSC_example_creature();
