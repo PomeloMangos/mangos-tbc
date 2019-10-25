@@ -17438,45 +17438,47 @@ void Player::ResetInstances(InstanceResetMethod method)
 {
     // method can be INSTANCE_RESET_ALL, INSTANCE_RESET_CHANGE_DIFFICULTY, INSTANCE_RESET_GROUP_JOIN
 
-    // we assume that when the difficulty changes, all instances that can be reset will be
-    Difficulty diff = GetDifficulty();
+    uint8 i, j;
 
-    for (uint8 i = 0; i < MAX_ADVANCED_DIFFICULTY; ++i)
+    for (i = 0; i < MAX_DIFFICULTY; ++i)
     {
-        for (BoundInstancesMap::iterator itr = m_boundInstances[diff][i].begin(); itr != m_boundInstances[diff][i].end();)
+        for (j = 0; j < MAX_ADVANCED_DIFFICULTY; ++j)
         {
-            DungeonPersistentState* state = itr->second.state;
-            const MapEntry* entry = sMapStore.LookupEntry(itr->first);
-            if (!entry || !state->CanReset())
+            for (BoundInstancesMap::iterator itr = m_boundInstances[i][j].begin(); itr != m_boundInstances[i][j].end();)
             {
-                ++itr;
-                continue;
-            }
-
-            if (method == INSTANCE_RESET_ALL)
-            {
-                // the "reset all instances" method can only reset normal maps
-                if (entry->map_type == MAP_RAID || diff == DUNGEON_DIFFICULTY_HEROIC)
+                DungeonPersistentState* state = itr->second.state;
+                const MapEntry* entry = sMapStore.LookupEntry(itr->first);
+                if (!entry || !state->CanReset())
                 {
                     ++itr;
                     continue;
                 }
+
+                if (method == INSTANCE_RESET_ALL)
+                {
+                    // the "reset all instances" method can only reset normal maps
+                    if (entry->map_type == MAP_RAID || Difficulty(i) == DUNGEON_DIFFICULTY_HEROIC)
+                    {
+                        ++itr;
+                        continue;
+                    }
+                }
+
+                // if the map is loaded, reset it
+                if (Map * map = sMapMgr.FindMap(state->GetMapId(), state->GetInstanceId()))
+                    if (map->IsDungeon())
+                        ((DungeonMap*)map)->Reset(method);
+
+                // since this is a solo instance there should not be any players inside
+                if (method == INSTANCE_RESET_ALL || method == INSTANCE_RESET_CHANGE_DIFFICULTY)
+                    SendResetInstanceSuccess(state->GetMapId());
+
+                state->DeleteFromDB();
+                m_boundInstances[Difficulty(i)][i].erase(itr++);
+
+                // the following should remove the instance save from the manager and delete it as well
+                state->RemovePlayer(this);
             }
-
-            // if the map is loaded, reset it
-            if (Map * map = sMapMgr.FindMap(state->GetMapId(), state->GetInstanceId()))
-                if (map->IsDungeon())
-                    ((DungeonMap*)map)->Reset(method);
-
-            // since this is a solo instance there should not be any players inside
-            if (method == INSTANCE_RESET_ALL || method == INSTANCE_RESET_CHANGE_DIFFICULTY)
-                SendResetInstanceSuccess(state->GetMapId());
-
-            state->DeleteFromDB();
-            m_boundInstances[diff][i].erase(itr++);
-
-            // the following should remove the instance save from the manager and delete it as well
-            state->RemovePlayer(this);
         }
     }
 }
