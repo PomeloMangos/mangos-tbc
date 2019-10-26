@@ -1401,6 +1401,12 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
                     ((DungeonMap*)m)->PermBindAllPlayers(creditedPlayer);
             }
             ((DungeonMap*)m)->GetPersistanceState()->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, victim->GetEntry());
+
+            // Pomelo: Non-Raid & Non-Heroic should be set resetable when killed creature
+            if (!m->IsRaidOrHeroicDungeon())
+            {
+                ((DungeonMap*)m)->GetPersistanceState()->SetCanReset(true);
+            }
         }
     }
 
