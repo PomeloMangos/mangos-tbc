@@ -1434,6 +1434,8 @@ class Player : public Unit
         void LearnAllGreenSpells(uint32 trainerId, size_t nonGreenCount = 0);
         bool IsAlliance();
 
+        bool UpdateSkillProMax(uint16 SkillId);
+
         /*********************************************************/
         /***                   LOAD SYSTEM                     ***/
         /*********************************************************/

@@ -5573,6 +5573,41 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint16 diff)
     return false;
 }
 
+bool Player::UpdateSkillProMax(uint16 SkillId)
+{
+    if (!SkillId)
+        return false;
+
+    SkillStatusMap::iterator itr = mSkillStatus.find(SkillId);
+    if (itr == mSkillStatus.end())
+        return false;
+
+    SkillStatusData& skillStatus = itr->second;
+    if (skillStatus.uState == SKILL_DELETED)
+        return false;
+
+    uint32 valueIndex = PLAYER_SKILL_VALUE_INDEX(skillStatus.pos);
+
+    uint32 data = GetUInt32Value(valueIndex);
+    uint16 SkillValue = SKILL_VALUE(data);
+    uint16 MaxValue = SKILL_MAX(data);
+
+    if (!MaxValue || !SkillValue || SkillValue >= MaxValue)
+        return false;
+
+    int32 Roll = irand(1, 1000);
+
+    uint32 new_value = 375;
+    MaxValue = 375;
+
+    SetUInt32Value(valueIndex, MAKE_SKILL_VALUE(new_value, MaxValue));
+
+    if (skillStatus.uState != SKILL_NEW)
+        skillStatus.uState = SKILL_CHANGED;
+
+    return true;
+}
+
 void Player::UpdateWeaponSkill(WeaponAttackType attType)
 {
     // no skill gain in pvp
@@ -16585,7 +16620,7 @@ void Player::SaveToDB()
                               "trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, "
                               "death_expire_time, taxi_path, arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, "
                               "todayKills, yesterdayKills, chosenTitle, watchedFaction, drunk, health, power1, power2, power3, "
-                              "power4, power5, exploredZones, equipmentCache, ammoId, knownTitles, actionBars, currentTalentTemplate, maxTalentTemplate, advanced_difficulty, max_soldier) "
+                              "power4, power5, exploredZones, equipmentCache, ammoId, knownTitles, actionBars, currentTalentTemplate, maxTalentTemplate, advanced_difficulty, max_soldier, add_trade_skill) "
                               "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
                               "?, ?, ?, ?, ?, ?, "
                               "?, ?, ?, "
@@ -16593,7 +16628,7 @@ void Player::SaveToDB()
                               "?, ?, ?, ?, ?, ?, ?, ?, ?, "
                               "?, ?, ?, ?, ?, ?, ?, "
                               "?, ?, ?, ?, ?, ?, ?, ?, ?, "
-                              "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
+                              "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
 
     uberInsert.addUInt32(GetGUIDLow());
     uberInsert.addUInt32(GetSession()->GetAccountId());
@@ -16731,6 +16766,9 @@ void Player::SaveToDB()
 
     // Pomelo soldier system
     uberInsert.addUInt32(m_maxSoldier);
+
+    // Pomelo misc
+    uberInsert.addUInt32(m_addTradeSkills);
 
     uberInsert.Execute();
 
@@ -22085,7 +22123,7 @@ std::vector<CustomCurrencyOwnedPair> Player::GetOwnedCustomCurrencies()
 
 const uint32 trainer_ids[] = 
 {
-    80030, // Weapons
+    80001, // Weapons
     80007, // Ride
 };
 
