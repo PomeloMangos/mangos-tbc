@@ -107,15 +107,15 @@ bool CurrencyItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targe
     }
     else if (item == POMELO_CURRENCY_C_30)
     {
-        pPlayer->ModifyMoney(300000);
+        pPlayer->ModifyMoney(200000);
     }
     else if (item == POMELO_CURRENCY_C_150)
     {
-        pPlayer->ModifyMoney(1500000);
+        pPlayer->ModifyMoney(1000000);
     }
     else if (item == POMELO_CURRENCY_C_1500)
     {
-        pPlayer->ModifyMoney(15000000);
+        pPlayer->ModifyMoney(10000000);
     }
     else 
     {
