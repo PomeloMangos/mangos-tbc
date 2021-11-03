@@ -238,10 +238,12 @@ bool GossipSelect(Player* pPlayer, Object* pObj, uint32 sender, uint32 action)
 	{
 		return true;
 	}
+#ifdef BUILD_PLAYERBOT
     else if (HandlePlayerBotGossipMenuSelect(pPlayer, pObj, sender, action))
     {
         return true;
     }
+#endif
 	else if (!FindActionItem(sender, action, item))
 	{
 		return false;
@@ -395,7 +397,9 @@ bool GossipSelect(Player* pPlayer, Object* pObj, uint32 sender, uint32 action)
 		GenerateDungeonGossipMenu(pPlayer, pObj->GetObjectGuid());
 		break;
     case TELE_FUNC::PLAYERBOT:
+#ifdef BUILD_PLAYERBOT
         GeneratePlayerBotGossipMenu(pPlayer, pObj->GetObjectGuid());
+#endif
         break;
 	default:
 		return false;
