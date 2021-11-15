@@ -6,14 +6,11 @@
  *
  **/
 
-#include "AI/ScriptDevAI/include/precompiled.h"
 #include "Tools/Language.h"
 #include "Pomelo/DBConfigMgr.h"
 #include "Pomelo/CustomCurrencyMgr.h"
 #include "Chat/Chat.h"
 #include "World/World.h"
-
-using namespace Teleport;
 
 #define POMELO_CURRENCY_100   83510
 #define POMELO_CURRENCY_500   83511

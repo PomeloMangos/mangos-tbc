@@ -615,7 +615,7 @@ bool ChatHandler::HandleGonameCommand(char* args)
         
         if (GenericTransport* transport = target->GetTransport())
             transport->CalculatePassengerOffset(x, y, z);
-        _player->TeleportTo(target->GetMapId(), x, y, z, _player->GetAngle(target), TELE_TO_GM_MODE, nullptr, target->GetTransport());
+        _player->TeleportTo(target->GetMapId(), x, y, z, _player->GetAngle(target), TELE_TO_GM_MODE, nullptr);
     }
     else
     {

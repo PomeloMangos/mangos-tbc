@@ -46,7 +46,7 @@ void PetLoyaltyMgr::LoadFromDB()
 		{
 			Field* field = result->Fetch();
             LevelUpLoyalty[i] = field[0].GetUInt32();
-            LevelStartLoyalty[i] = field[0].GetUInt32();
+            LevelStartLoyalty[i] = field[1].GetUInt32();
             ++i;
 		} while (result->NextRow());
 	}

@@ -15,7 +15,7 @@ void InitPlayerItemMgr::LoadFromDB()
     items.clear();
     QueryResult* result = WorldDatabase.PQuery(
     "SELECT `itemid`, `amount` "
-    "FROM `playercreateinfo_item` "
+    "FROM `pomelo_playercreateinfo_item` "
     "WHERE `race` = 0 AND `class` = 0; ");
 
     if (result)

@@ -148,7 +148,7 @@ namespace MaNGOS
 
             xp_gain *= target->GetCreatureInfo()->ExperienceMultiplier;
 
-            if (unit->getLevel() < 60)
+            if (unit->GetLevel() < 60)
             {
                 return (uint32)(std::nearbyint(xp_gain * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL)));
             }

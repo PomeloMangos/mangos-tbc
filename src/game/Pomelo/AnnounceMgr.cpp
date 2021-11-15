@@ -15,9 +15,10 @@ void AnnounceMgr::LoadFromDB()
 {
     m_announcements.clear();
     current_announce = 0;
-    QueryResult* result = WorldDatabase.PQuery(
-        "SELECT `announce` "
-        "FROM `pomelo_announce`; ");
+    QueryResult* result = LoginDatabase.PQuery(
+        "SELECT `text` "
+        "FROM `pomelo_announce`"
+        "ORDER BY `priority DESC`; ");
 
     if (result)
 	{

@@ -6,13 +6,10 @@
  *
  **/
 
-#include "AI/ScriptDevAI/include/precompiled.h"
 #include "Tools/Language.h"
 #include "Pomelo/DBConfigMgr.h"
 #include "Chat/Chat.h"
 #include "World/World.h"
-
-using namespace Teleport;
 
 uint32 levelup_max_item;
 uint32 levelup_1_item;
@@ -21,9 +18,9 @@ uint32 levelup_5_item;
 void DoLevelupForLevelupItem(Player* pPlayer, uint32 level)
 {
     uint32 max = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
-    if (pPlayer->getLevel() + level > max)
+    if (pPlayer->GetLevel() + level > max)
     {
-        level = max - pPlayer->getLevel();
+        level = max - pPlayer->GetLevel();
     }
 
     if (level == 0)
@@ -31,7 +28,7 @@ void DoLevelupForLevelupItem(Player* pPlayer, uint32 level)
         return;
     }
 
-    ChatHandler(pPlayer).HandleCharacterLevel(pPlayer, pPlayer->GetObjectGuid(), pPlayer->getLevel(), pPlayer->getLevel() + level);
+    ChatHandler(pPlayer).HandleCharacterLevel(pPlayer, pPlayer->GetObjectGuid(), pPlayer->GetLevel(), pPlayer->GetLevel() + level);
 }
 
 bool LevelupItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)

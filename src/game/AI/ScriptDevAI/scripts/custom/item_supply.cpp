@@ -6,7 +6,6 @@
  *
  **/
 
-#include "AI/ScriptDevAI/include/precompiled.h"
 #include "Tools/Language.h"
 #include "Pomelo/DBConfigMgr.h"
 #include "Chat/Chat.h"
@@ -22,7 +21,7 @@ bool IsManaClass(uint32 classId)
 
 bool SupplyItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
 {
-    if (pPlayer->isInCombat() || !pPlayer->isAlive())
+    if (pPlayer->IsInCombat() || !pPlayer->IsAlive())
     {
         pPlayer->GetSession()->SendNotification(LANG_CANNOT_USE_IN_COMBAT);
         return true;

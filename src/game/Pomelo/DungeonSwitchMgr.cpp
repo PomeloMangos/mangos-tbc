@@ -18,7 +18,7 @@ std::unordered_map<uint32, float> m_normalDamage;
 void DungeonSwitchMgr::LoadFromDB()
 {
     m_dungeonSwitch.clear();
-    QueryResult* result = WorldDatabase.PQuery(
+    QueryResult* result = CharacterDatabase.PQuery(
         "SELECT `entry` "
         "FROM `pomelo_dungeon_switch` "
         "WHERE `disabled` = TRUE;");
@@ -33,7 +33,7 @@ void DungeonSwitchMgr::LoadFromDB()
     delete result;
 
     m_tenPlayersSwitch.clear();
-    QueryResult* result2 = WorldDatabase.PQuery(
+    QueryResult* result2 = CharacterDatabase.PQuery(
         "SELECT `entry` "
         "FROM `pomelo_dungeon_switch` "
         "WHERE `ten_players_enabled` = TRUE;");
@@ -48,7 +48,7 @@ void DungeonSwitchMgr::LoadFromDB()
     delete result2;
 
     m_heroicHp.clear();
-    QueryResult* result3 = WorldDatabase.PQuery(
+    QueryResult* result3 = CharacterDatabase.PQuery(
         "SELECT `entry`, `heroic_hp` "
         "FROM `pomelo_dungeon_switch`;");
     if (result3)
@@ -62,7 +62,7 @@ void DungeonSwitchMgr::LoadFromDB()
     delete result3;
 
     m_heroicDamage.clear();
-    QueryResult* result4 = WorldDatabase.PQuery(
+    QueryResult* result4 = CharacterDatabase.PQuery(
         "SELECT `entry`, `heroic_damage` "
         "FROM `pomelo_dungeon_switch`;");
     if (result4)
@@ -77,7 +77,7 @@ void DungeonSwitchMgr::LoadFromDB()
 
 
     m_normalHp.clear();
-    QueryResult* result5 = WorldDatabase.PQuery(
+    QueryResult* result5 = CharacterDatabase.PQuery(
         "SELECT `entry`, `normal_hp` "
         "FROM `pomelo_dungeon_switch`;");
     if (result5)
@@ -91,7 +91,7 @@ void DungeonSwitchMgr::LoadFromDB()
     delete result5;
 
     m_normalDamage.clear();
-    QueryResult* result6 = WorldDatabase.PQuery(
+    QueryResult* result6 = CharacterDatabase.PQuery(
         "SELECT `entry`, `normal_damage` "
         "FROM `pomelo_dungeon_switch`;");
     if (result6)

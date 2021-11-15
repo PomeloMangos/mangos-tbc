@@ -68,7 +68,7 @@ void GeneratePlayerBotGossipMenu(Player* pPlayer, ObjectGuid guid)
     // Load characters if not cached
     LoadAndCachePlayerBotCharacters(pPlayer);
     uint32 account = pPlayer->GetSession()->GetAccountId();
-    pPlayer->PlayerTalkClass->ClearMenus();
+    pPlayer->GetPlayerMenu()->ClearMenus();
     std::string charlist = std::string(pPlayer->GetSession()->GetMangosString(LANG_PLAYERBOT_CHARLIST));
     charlist.append(" (");
     charlist.append(std::to_string(CountHiredCharacters(account)));
@@ -90,7 +90,7 @@ bool HandlePlayerBotGossipMenuSelect(Player* pPlayer, Object* pObj, uint32 sende
     {
         ChatHandler(pPlayer).PSendSysMessage(
             LANG_PLAYERBOT_NO_CHARACTER);
-        pPlayer->PlayerTalkClass->CloseGossip();
+        pPlayer->GetPlayerMenu()->CloseGossip();
         return true;
     }
 
@@ -105,7 +105,7 @@ bool HandlePlayerBotGossipMenuSelect(Player* pPlayer, Object* pObj, uint32 sende
     if (sender == 80009)
     {
         // Clear menu
-        pPlayer->PlayerTalkClass->ClearMenus();
+        pPlayer->GetPlayerMenu()->ClearMenus();
 
         for (uint8 i = 0; i < m_accountCharactersMap[account].size(); ++i)
         {
@@ -148,7 +148,7 @@ bool HandlePlayerBotGossipMenuSelect(Player* pPlayer, Object* pObj, uint32 sende
                     LANG_PLAYERBOT_HIRE_EXCEED,
                     pPlayer->GetMaxSoldier());
 
-                pPlayer->PlayerTalkClass->CloseGossip();
+                pPlayer->GetPlayerMenu()->CloseGossip();
                 return true;
             }
 
@@ -174,7 +174,7 @@ bool HandlePlayerBotGossipMenuSelect(Player* pPlayer, Object* pObj, uint32 sende
     else if (sender == 80011)
     {
         // Clear menu
-        pPlayer->PlayerTalkClass->ClearMenus();
+        pPlayer->GetPlayerMenu()->ClearMenus();
 
         for (uint8 i = 0; i < m_accountCharactersMap[account].size(); ++i)
         {
@@ -209,7 +209,7 @@ bool HandlePlayerBotGossipMenuSelect(Player* pPlayer, Object* pObj, uint32 sende
     else if (sender == 80012)
     {
         AccountCharacter& charr = m_accountCharactersMap[account][action];
-        pPlayer->PlayerTalkClass->ClearMenus();
+        pPlayer->GetPlayerMenu()->ClearMenus();
         std::string menu1 = std::string(charr.name);
         std::string menu2 = std::string(charr.name);
         std::string menu3 = std::string(charr.name);
@@ -286,7 +286,7 @@ bool HandlePlayerBotGossipMenuSelect(Player* pPlayer, Object* pObj, uint32 sende
         pPlayer->GetSession()->SendListInventory(pStoreNpc->GetObjectGuid());
      }
 
-	pPlayer->PlayerTalkClass->CloseGossip();
+	pPlayer->GetPlayerMenu()->CloseGossip();
     return true;
 }
 #endif

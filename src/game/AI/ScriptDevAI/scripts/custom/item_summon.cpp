@@ -11,7 +11,6 @@
 #include "Pomelo/MultiTalentMgr.h"
 #include "Pomelo/CustomCurrencyMgr.h"
 #include "AI/ScriptDevAI/include/sc_gossip.h"
-#include "AI/ScriptDevAI/include/precompiled.h"
 #include "Tools/Language.h"
 
 bool SummonOnePlayer(Player* pCaster, Player* pTarget)
@@ -22,7 +21,7 @@ bool SummonOnePlayer(Player* pCaster, Player* pTarget)
     float x, y, z;
     pCaster->GetPosition(x, y, z);
 
-    pTarget->SetSummonPoint(pCaster->GetMapId(), x, y, z);
+    pTarget->InternalSetSummonPoint(pCaster->GetMapId(), x, y, z);
 
     WorldPacket data(SMSG_SUMMON_REQUEST, 8 + 4 + 4);
     data << pCaster->GetObjectGuid();                      // summoner guid
@@ -34,7 +33,7 @@ bool SummonOnePlayer(Player* pCaster, Player* pTarget)
 
 bool SummonItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
 {
-    if (pPlayer->isInCombat() || !pPlayer->isAlive())
+    if (pPlayer->IsInCombat() || !pPlayer->IsAlive())
     {
         pPlayer->GetSession()->SendNotification(LANG_CANNOT_USE_IN_COMBAT);
         return true;

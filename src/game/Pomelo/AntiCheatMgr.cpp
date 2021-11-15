@@ -39,13 +39,12 @@ void AntiCheatMgr::TakeActionForCheater(Player* pPlayer, AntiCheatAction action)
         snprintf(str, 2048, format, pPlayer->GetName());
         sWorld.SendServerMessage(SERVER_MSG_CUSTOM, str);
 
-        if (pPlayer->isAlive())
+        if (pPlayer->IsAlive())
         {
-            DamageEffectType damageType = DIRECT_DAMAGE;
             uint32 absorb = 0;
             uint32 damage = pPlayer->GetHealth();
-            pPlayer->DealDamageMods(pPlayer, damage, &absorb, damageType);
-            pPlayer->DealDamage(pPlayer, damage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+            pPlayer->DealDamageMods(pPlayer, pPlayer, damage, &absorb, DIRECT_DAMAGE, nullptr);
+            pPlayer->DealDamage(pPlayer, pPlayer, damage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
         }
 
         break; 
@@ -111,8 +110,8 @@ bool AntiCheatMgr::IsSpeedCheat(Player* pPlayer, MovementInfo* pMovement)
     }
 
     pPlayer->m_anticheatSpeedResetTimer += diff;
-    const Position* pos = pMovement->GetPos();
-    float dis = pPlayer->GetDistance(pos->x, pos->y, pos->z);
+    const Position& pos = pMovement->GetPos();
+    float dis = pPlayer->GetDistance(pos.x, pos.y, pos.z);
     float maxdis = 0;
 
     float speedRate = pPlayer->GetSpeed(pMovement->GetSpeedType());

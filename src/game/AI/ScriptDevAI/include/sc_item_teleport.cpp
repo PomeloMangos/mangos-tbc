@@ -7,7 +7,6 @@
  **/
 
 
-#include "precompiled.h"
 #include "sc_item_teleport.h"
 #include "ProgressBar.h"
 

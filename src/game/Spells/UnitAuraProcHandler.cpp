@@ -584,10 +584,9 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
                 auto id = triggeredByHolder->GetId();
                 if (id != 12536) // Pomelo: Exception for Clearcasting
                 {
-                    removedSpells.push_back(triggeredByHolder->GetId());
+                    RemoveSpellAuraHolder(triggeredByHolder);
                 }
             }
-                RemoveSpellAuraHolder(triggeredByHolder);
         }
     }
 }
@@ -983,9 +982,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                 // Elemental Sieve
                 case 36035:
                 {
-                    Creature* pCaster = dynamic_cast<Creature*>(triggeredByAura->GetCaster());
-                    if (!pCaster)
-                        return SPELL_AURA_PROC_FAILED;
                     Pet* pCaster = dynamic_cast<Pet*>(triggeredByAura->GetCaster());
 
                     // aura only affect the spirit totem, since this is the one that need to be in range.

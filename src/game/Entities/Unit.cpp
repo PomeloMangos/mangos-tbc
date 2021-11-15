@@ -617,7 +617,7 @@ void Unit::EvadeTimerExpired()
     }
     else
     {
-        SetEvade(EVADE_NONE);
+        GetCombatManager().SetEvadeState(EVADE_NONE);
     }
 
     // Also stop anti cheat timer
@@ -1275,15 +1275,15 @@ void Unit::HandleDamageDealt(Unit* dealer, Unit* victim, uint32& damage, CleanDa
             float threat = damage * sSpellMgr.GetSpellThreatMultiplier(spellProto);
 
             // Pomelo enhance tank threat
-            if (this->GetTypeId() == TYPEID_PLAYER)
+            if (dealer->GetTypeId() == TYPEID_PLAYER)
             {
                 float tankMultiplier = sDBConfigMgr.GetFloat("tank.threat");
                 if (tankMultiplier < 1) 
                     tankMultiplier = 1;
-                if (this->HasAura(71) // Vanguard
-                    || this->HasAura(5487) // Bear Form
-                    || this->HasAura(9634) // Dire Bear Form
-                    || this->HasAura(25780)) // Righteous Fury
+                if (dealer->HasAura(71) // Vanguard
+                    || dealer->HasAura(5487) // Bear Form
+                    || dealer->HasAura(9634) // Dire Bear Form
+                    || dealer->HasAura(25780)) // Righteous Fury
                 {
                     threat = threat * tankMultiplier;
                 }
@@ -1479,9 +1479,9 @@ void Unit::JustKilledCreature(Unit* killer, Creature* victim, Player* responsibl
             static_cast<DungeonMap*>(map)->GetPersistanceState()->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, victim->GetEntry());
 
             // Pomelo: Non-Raid & Non-Heroic should be set resetable when killed creature
-            if (!m->IsRaidOrHeroicDungeon())
+            if (!map->IsRaidOrHeroicDungeon())
             {
-                ((DungeonMap*)m)->GetPersistanceState()->SetCanReset(true);
+                static_cast<DungeonMap*>(map)->GetPersistanceState()->SetCanReset(true);
             }
         }
     }
@@ -8526,7 +8526,6 @@ void Unit::EngageInCombatWithAggressor(Unit* aggressor)
 
 void Unit::ClearInCombat()
 {
-    m_CombatTimer = 0;
     m_evadeTimer = 0;
     m_stopCombatTimer = 0;
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
@@ -9504,21 +9503,6 @@ bool Unit::IsOfflineTarget(Unit* victim) const
         return true;
 
     return false;
-}
-
-bool Unit::IsLeashingTarget(Unit* victim) const
-{
-    float AttackDist = GetAttackDistance(victim);
-    float ThreatRadius = sWorld.getConfig(CONFIG_FLOAT_THREAT_RADIUS);
-    float x, y, z, ori;
-    if (GetTypeId() == TYPEID_UNIT)
-        static_cast<Creature const*>(this)->GetCombatStartPosition(x, y, z, ori);
-    else
-        GetPosition(x, y, z);
-
-    // Use AttackDistance in distance check if threat radius is lower. This prevents creature bounce in and out of combat every update tick.
-    // TODO: Implement proper leashing
-    return !victim->IsWithinDist3d(x, y, z, ThreatRadius > AttackDist ? ThreatRadius : AttackDist) && !GetMap()->IsDungeon();
 }
 
 uint32 Unit::GetCreatureType() const

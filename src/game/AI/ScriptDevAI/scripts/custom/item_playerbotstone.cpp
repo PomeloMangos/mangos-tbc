@@ -6,7 +6,6 @@
  *
  **/
 
-#include "AI/ScriptDevAI/include/precompiled.h"
 #include "Tools/Language.h"
 #include "Pomelo/DBConfigMgr.h"
 #include "Pomelo/CustomCurrencyMgr.h"

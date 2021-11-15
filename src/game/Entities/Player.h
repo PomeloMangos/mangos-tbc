@@ -945,8 +945,7 @@ class Player : public Unit
         void AddToWorld() override;
         void RemoveFromWorld() override;
 
-        bool TeleportToInternal(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0, AreaTrigger const* at = nullptr);
-        bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0, AreaTrigger const* at = nullptr);
+        bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0, AreaTrigger const* at = nullptr, GenericTransport* transport = nullptr);
 
         bool TeleportTo(WorldLocation const& loc, uint32 options = 0)
         {
@@ -955,15 +954,21 @@ class Player : public Unit
 
         bool TeleportToBGEntryPoint();
 
-        void SetSummonPoint(uint32 mapid, float x, float y, float z, ObjectGuid summoner)
+        void InternalSetSummonPoint(uint32 mapid, float x, float y, float z)
         {
             m_summon_expire = time(nullptr) + MAX_PLAYER_SUMMON_DELAY;
             m_summon_mapid = mapid;
             m_summon_x = x;
             m_summon_y = y;
             m_summon_z = z;
+        }
+
+        void SetSummonPoint(uint32 mapid, float x, float y, float z, ObjectGuid summoner)
+        {
+            InternalSetSummonPoint(mapid, x, y, z);
             m_summoner = summoner;
         }
+
         void SummonIfPossible(bool agree, ObjectGuid guid);
 
         bool Create(uint32 guidlow, const std::string& name, uint8 race, uint8 class_, uint8 gender, uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair, uint8 outfitId);

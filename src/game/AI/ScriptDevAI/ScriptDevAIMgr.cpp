@@ -214,7 +214,7 @@ bool ScriptDevAIMgr::OnGossipSelect(Player* pPlayer, Item* pItem, uint32 uiSende
     // Handle gossip select from an item
 	debug_log("SD2: GO Gossip selection, sender: %u, action: %u", uiSender, uiAction);
 
-	pPlayer->PlayerTalkClass->ClearMenus();
+	pPlayer->GetPlayerMenu()->ClearMenus();
 
 	Script* pTempScript = GetScript(ObjectMgr::GetItemPrototype(pItem->GetEntry())->ScriptId);
 
@@ -224,7 +224,7 @@ bool ScriptDevAIMgr::OnGossipSelect(Player* pPlayer, Item* pItem, uint32 uiSende
 	if (!pTempScript->pGossipSelectItem)
 		return false;
 
-	pPlayer->PlayerTalkClass->ClearMenus();
+	pPlayer->GetPlayerMenu()->ClearMenus();
 	return pTempScript->pGossipSelectItem(pPlayer, pItem, uiSender, uiAction);
 }
 

@@ -6,7 +6,6 @@
  *
  **/
 
-#include "AI/ScriptDevAI/include/precompiled.h"
 #include "Tools/Language.h"
 #include "Pomelo/DBConfigMgr.h"
 #include "Chat/Chat.h"
@@ -14,7 +13,7 @@
 
 bool ReviveItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
 {
-    if (pPlayer->isInCombat() || !pPlayer->isAlive())
+    if (pPlayer->IsInCombat() || !pPlayer->IsAlive())
     {
         pPlayer->GetSession()->SendNotification(LANG_CANNOT_USE_IN_COMBAT);
         return true;
@@ -33,7 +32,7 @@ bool ReviveItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets
         Player* pMember = itr->getSource();
         uint32 mapId = pPlayer->GetMapId();
 
-        if (!pMember->IsInWorld() || !pMember->isDead())
+        if (!pMember->IsInWorld() || !pMember->IsDead())
             continue;
 
         if (pMember->GetMapId() != mapId)

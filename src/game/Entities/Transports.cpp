@@ -245,7 +245,7 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
                 Player* player = static_cast<Player*>(obj);
                 if (player->IsDead() && !player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
                     player->ResurrectPlayer(1.0);
-                player->TeleportTo(newMapid, pos.x, pos.y, pos.z, pos.o, TELE_TO_NOT_LEAVE_TRANSPORT, nullptr, this);
+                player->TeleportTo(newMapid, pos.x, pos.y, pos.z, pos.o, TELE_TO_NOT_LEAVE_TRANSPORT, nullptr);
                 break;
             }
         }

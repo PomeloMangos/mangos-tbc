@@ -220,6 +220,7 @@ void TransmogrificationMgr::TransmogrifyItem(Item* pItem, uint32 display, uint32
 			"AND `model` = %u "
 			"AND `owner_guid` = %u "
 			"AND `item_template_id` = %u", pItem->GetGUIDLow(), display, pItem->GetOwner()->GetGUIDLow(), pItem->GetEntry());
+
 		if (result)
 		{
 			Field* field = result->Fetch();

@@ -325,7 +325,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
     if (victim)
     {
-        // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.GetVictim() clear at Unit death etc.
+        // i_pet.GetVictim() can't be used for check in case stop fighting, i_pet.GetVictim() clear at Unit death etc.
         // This is needed for charmed creatures, as once their target was reset other effects can trigger threat
         if (!m_unit->CanAttack(victim))
         {

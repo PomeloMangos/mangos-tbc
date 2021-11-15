@@ -333,23 +333,6 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recv_data)
     if (!ProcessMovementInfo(movementInfo, mover, plMover, recv_data))
         return;
 
-    if (sAntiCheatMgr.IsSpeedCheat(_player, &movementInfo) && sDBConfigMgr.GetUInt32("anticheat.speed.action") == ANTI_CHEAT_ACTION_KICK)
-        return;
-
-    // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
-    if (opcode == MSG_MOVE_FALL_LAND && plMover && !plMover->IsTaxiFlying())
-        plMover->HandleFall(movementInfo);
-
-    // Remove auras that should be removed at landing on ground or water
-    if (opcode == MSG_MOVE_FALL_LAND || opcode == MSG_MOVE_START_SWIM)
-        mover->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_LANDING); // Parachutes
-
-    /* process position-change */
-    HandleMoverRelocation(movementInfo);
-
-    if (plMover)
-        plMover->UpdateFallInformationIfNeed(movementInfo, opcode);
-
     WorldPacket data(opcode, recv_data.size());
     data << mover->GetPackGUID();                           // write guid
     movementInfo.Write(data);                               // write data

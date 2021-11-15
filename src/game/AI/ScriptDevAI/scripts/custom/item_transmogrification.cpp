@@ -11,7 +11,6 @@
 #include "Pomelo/TransmogrificationMgr.h"
 #include "Pomelo/CustomCurrencyMgr.h"
 #include "AI/ScriptDevAI/include/sc_gossip.h"
-#include "AI/ScriptDevAI/include/precompiled.h"
 #include "Tools/Language.h"
 
 #define MODEL_VENDOR_ID 80037
@@ -47,7 +46,7 @@ std::string GenerateItemText(std::string name, uint32 quality)
 void GenerateTransmogrificationGossipMenu(Player* pPlayer, ObjectGuid guid)
 {
 	// Clear menu
-	pPlayer->PlayerTalkClass->ClearMenus();
+	pPlayer->GetPlayerMenu()->ClearMenus();
 
 	pPlayer->ADD_GOSSIP_ITEM(0, pPlayer->GetSession()->GetMangosString(LANG_TRANSMOG_SELECT_MODEL), 80002, 0);
 	pPlayer->ADD_GOSSIP_ITEM(0, pPlayer->GetSession()->GetMangosString(LANG_TRANSMOG_UNSELECT_MODEL), 80002, 1);
@@ -61,7 +60,7 @@ void GenerateTransmogrificationGossipMenu(Player* pPlayer, ObjectGuid guid)
 void GenerateTransmogrificationSelectModelGossipMenu(Player* pPlayer, ObjectGuid guid)
 {
 	// Clear menu
-	pPlayer->PlayerTalkClass->ClearMenus();
+	pPlayer->GetPlayerMenu()->ClearMenus();
 
 	for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
 	{
@@ -78,7 +77,7 @@ void GenerateTransmogrificationSelectModelGossipMenu(Player* pPlayer, ObjectGuid
 void GenerateTransmogrificationApplyModelGossipMenu(Player* pPlayer, ObjectGuid guid)
 {
 	// Clear menu
-	pPlayer->PlayerTalkClass->ClearMenus();
+	pPlayer->GetPlayerMenu()->ClearMenus();
 
 	std::vector<TransmogrificationTempStore> stored = sTransmogrificationMgr.GetStoredDisplays(pPlayer);
 	for (auto i = stored.begin(); i != stored.end(); ++i) 
@@ -98,7 +97,7 @@ void GenerateTransmogrificationApplyModelGossipMenu(Player* pPlayer, ObjectGuid 
 void GenerateTransmogrificationRestoreModelGossipMenu(Player* pPlayer, ObjectGuid guid)
 {
 	// Clear menu
-	pPlayer->PlayerTalkClass->ClearMenus();
+	pPlayer->GetPlayerMenu()->ClearMenus();
 
 	std::vector<TransmogrificationTempStore> stored = sTransmogrificationMgr.GetTransmogrifiedItems(pPlayer);
 	for (auto i = stored.begin(); i != stored.end(); ++i)
@@ -122,7 +121,7 @@ bool HandleTransmogrificationGossipMenuSelect(Player* pPlayer, Object* pObj, uin
 
 	if (!CheckTransmogrificationPermission(pPlayer))
 	{
-		pPlayer->PlayerTalkClass->CloseGossip();
+		pPlayer->GetPlayerMenu()->CloseGossip();
 		pPlayer->GetSession()->SendNotification(LANG_NO_PERMISSION_TO_USE);
 		return true;
 	}
@@ -136,7 +135,7 @@ bool HandleTransmogrificationGossipMenuSelect(Player* pPlayer, Object* pObj, uin
 				break;
 			case 1:
 				sTransmogrificationMgr.ClearStoredDisplays(pPlayer);
-				pPlayer->PlayerTalkClass->CloseGossip();
+				pPlayer->GetPlayerMenu()->CloseGossip();
 				pPlayer->GetSession()->SendNotification(LANG_TRANSMOG_UNSELECT_MODEL_OK);
 				break;
 			case 2:
@@ -161,7 +160,7 @@ bool HandleTransmogrificationGossipMenuSelect(Player* pPlayer, Object* pObj, uin
 		if (pItem)
 		{
 			sTransmogrificationMgr.StoreDisplay(pPlayer, pItem);
-			pPlayer->PlayerTalkClass->CloseGossip();
+			pPlayer->GetPlayerMenu()->CloseGossip();
 			pPlayer->GetSession()->SendNotification(LANG_TRANSMOG_SELECT_MODEL_OK);
 		}
 		return true;
@@ -181,7 +180,7 @@ bool HandleTransmogrificationGossipMenuSelect(Player* pPlayer, Object* pObj, uin
 					cost = sDBConfigMgr.GetUInt32(CONFIG_TRANSMOG_COST_VALUE);
 					if (pPlayer->GetMoney() < cost)
 					{
-						pPlayer->PlayerTalkClass->CloseGossip();
+						pPlayer->GetPlayerMenu()->CloseGossip();
 						pPlayer->GetSession()->SendNotification(LANG_TRANSMOG_NO_MONEY);
 						return true;
 					}
@@ -193,7 +192,7 @@ bool HandleTransmogrificationGossipMenuSelect(Player* pPlayer, Object* pObj, uin
 					balance = sCustomCurrencyMgr.GetAccountCurrency(pPlayer->GetSession()->GetAccountId(), currency_id);
 					if (balance < cost)
 					{
-						pPlayer->PlayerTalkClass->CloseGossip();
+						pPlayer->GetPlayerMenu()->CloseGossip();
                         currency_name = sCustomCurrencyMgr.GetCurrencyInfo(currency_id)->name.c_str();
 						pPlayer->GetSession()->SendNotification(
 							LANG_TELE_STORE_NO_CURRENCY_TO_BUY, 
@@ -216,7 +215,7 @@ bool HandleTransmogrificationGossipMenuSelect(Player* pPlayer, Object* pObj, uin
 					break;
 			}
 			sTransmogrificationMgr.TransmogrifyItemFromTempStore(pItem, (EquipmentSlots)action);
-			pPlayer->PlayerTalkClass->CloseGossip();
+			pPlayer->GetPlayerMenu()->CloseGossip();
 			pPlayer->GetSession()->SendNotification(LANG_TRANSMOG_APPLY_OK);
 		}
 		return true;
@@ -227,7 +226,7 @@ bool HandleTransmogrificationGossipMenuSelect(Player* pPlayer, Object* pObj, uin
 		if (pItem)
 		{
 			sTransmogrificationMgr.RestoreTransmogrification(pPlayer, pItem->GetGUIDLow());
-			pPlayer->PlayerTalkClass->CloseGossip();
+			pPlayer->GetPlayerMenu()->CloseGossip();
 			pPlayer->GetSession()->SendNotification(LANG_TRANSMOG_RESTORE_OK);
 		}
 		return true;

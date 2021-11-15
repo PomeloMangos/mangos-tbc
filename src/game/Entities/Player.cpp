@@ -1992,8 +1992,7 @@ bool Player::isGMChat() const
     return false;
 }
 
-
-bool Player::TeleportToInternal(uint32 mapid, float x, float y, float z, float orientation, uint32 options /*=0*/, AreaTrigger const* at /*=nullptr*/)
+bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options /*=0*/, AreaTrigger const* at /*=nullptr*/, GenericTransport* transport /*=nullptr*/)
 {
     // do not let charmed players/creatures teleport
     if (HasCharmer())
@@ -2032,23 +2031,6 @@ bool Player::TeleportToInternal(uint32 mapid, float x, float y, float z, float o
     {
         uint32 miscRequirement = 0;
         AreaLockStatus lockStatus = GetAreaTriggerLockStatus(at, miscRequirement);
-
-        // Pomelo dungeon switch
-        uint32 mapId = at->target_mapId;
-        if (sDungeonSwitchMgr.IsLocked(mapId) && GetSession()->GetSecurity() < SEC_GAMEMASTER)
-        {
-            lockStatus = AREA_LOCKSTATUS_NOT_ALLOWED;
-            GetSession()->SendNotification(LANG_DUNGEON_NOT_AVAILABLE);
-        }
-
-        MapEntry const* mapEntry = sMapStore.LookupEntry(at->target_mapId);
-        bool isDungeon = mapEntry->IsDungeon() || mapEntry->IsRaid();
-        if (isDungeon && GetAdvancedDifficulty() == ADVANCED_DIFFICULTY_TEN_PLAYERS && !sDungeonSwitchMgr.IsSupportTenPlayersDifficulty(mapId))
-        {
-            lockStatus = AREA_LOCKSTATUS_NOT_ALLOWED;
-            GetSession()->SendNotification(LANG_10_PLR_DIFFICULTY_NOT_SUPPORT);
-        }
-
         if (lockStatus != AREA_LOCKSTATUS_OK)
         {
             // Teleport not requested by area-trigger
@@ -2060,13 +2042,6 @@ bool Player::TeleportToInternal(uint32 mapid, float x, float y, float z, float o
 
             SendTransferAbortedByLockStatus(mEntry, at, lockStatus, miscRequirement);
             return false;
-        }
-
-        if (isDungeon && GetAdvancedDifficulty() == ADVANCED_DIFFICULTY_TEN_PLAYERS)
-        {
-            // Notify the 10 players rule
-            ChatHandler(this).PSendSysMessage(
-                LANG_10_PLR_DIFFICULTY_WELCOME);
         }
     }
 
@@ -2287,18 +2262,6 @@ bool Player::TeleportToInternal(uint32 mapid, float x, float y, float z, float o
             return false;
     }
     return true;
-}
-
-bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options /*=0*/, AreaTrigger const* at /*=nullptr*/)
-{
-    bool ret = TeleportToInternal(mapid, x, y, z, orientation, options, at);
-
-    if (ret)
-    {
-        m_anticheatTeleported = true;
-    }
-
-    return ret;
 }
 
 bool Player::TeleportToBGEntryPoint()
@@ -2825,6 +2788,8 @@ void Player::GiveXP(uint32 xp, Creature* victim, float groupRate)
 // Current player experience not update (must be update by caller)
 void Player::GiveLevel(uint32 level)
 {
+    uint32 previousLevel = GetLevel();
+
     if (level == GetLevel())
         return;
 
@@ -5074,17 +5039,7 @@ void Player::UpdateLocalChannels(uint32 newZone)
     {
         next = i; ++next;
 
-        // skip non built-in channels
-        if (!(*i)->IsConstant())
-            continue;
-
-		// Overrided trade channel to be global channel
-		if ((*i)->IsTrade() && sWorld.getConfig(CONFIG_BOOL_OVERRIDE_TRADE_CHANNEL))
-			continue;
-
-        ChatChannelsEntry const* ch = GetChannelEntryFor((*i)->GetChannelId());
-        if (!ch)
-            continue;
+        ChatChannelsEntry const* ch = (*i)->GetChannelEntry();
 
         // skip non built-in channels or global channel without zone name in pattern
         if (!ch || (ch->flags & 4) == 4)
@@ -6548,7 +6503,7 @@ void Player::CheckAreaExploreAndOutdoor()
 
             uint32 area = p->ID;
             auto rate = 1.0f;
-            if (getLevel() < 60)
+            if (GetLevel() < 60)
             {
                 rate = sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE);
             }
@@ -6567,7 +6522,7 @@ void Player::CheckAreaExploreAndOutdoor()
                 uint32 XP;
                 if (diff < -5)
                 {
-                    XP = uint32(sObjectMgr.GetBaseXP(getLevel() + 5) * rate);
+                    XP = uint32(sObjectMgr.GetBaseXP(GetLevel() + 5) * rate);
                 }
                 else if (diff > 5)
                 {
@@ -13459,7 +13414,7 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
 
     // Used for client inform but rewarded only in case not max level
     auto rate = 1.0f;
-    if (getLevel() < 60)
+    if (GetLevel() < 60)
     {
         rate = sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST);
     }
@@ -16777,7 +16732,7 @@ void Player::SaveToDB()
                               "trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, "
                               "death_expire_time, taxi_path, arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, "
                               "todayKills, yesterdayKills, chosenTitle, watchedFaction, drunk, health, power1, power2, power3, "
-                              "power4, power5, exploredZones, equipmentCache, ammoId, knownTitles, actionBars, currentTalentTemplate, maxTalentTemplate, advanced_difficulty, max_soldier, additional_trade_skill) "
+                              "power4, power5, exploredZones, equipmentCache, ammoId, knownTitles, actionBars, grantableLevels, currentTalentTemplate, maxTalentTemplate, advanced_difficulty, max_soldier, additional_trade_skill) "
                               "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
                               "?, ?, ?, ?, ?, ?, "
                               "?, ?, ?, "
@@ -22363,7 +22318,7 @@ void Player::LearnAllGreenSpells(uint32 trainerId, size_t nonGreenCount)
         if (!this->IsSpellFitByClassAndRace(tSpell->learnedSpell, &reqLevel))
             continue;
 
-        if (tSpell->conditionId && !sObjectMgr.IsPlayerMeetToCondition(tSpell->conditionId, this, this->GetMap(), this, CONDITION_FROM_TRAINER))
+        if (tSpell->conditionId && !sObjectMgr.IsConditionSatisfied(tSpell->conditionId, this, this->GetMap(), this, CONDITION_FROM_TRAINER))
             continue;
 
         reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
@@ -22395,7 +22350,7 @@ void Player::LearnSpellsWhenLevelup(uint32 previousLevel)
     // Hardcode for shamman temporarily
     if (classId == 7)
     {
-        uint32 level = getLevel();
+        uint32 level = GetLevel();
         if (previousLevel < 5 && level >= 5)
         {
             ChatHandler(this).HandleAddItemCommandInternal("5175", true);
@@ -22415,7 +22370,7 @@ void Player::LearnSpellsWhenLevelup(uint32 previousLevel)
     }
     else if (classId == 4)
     {
-        uint32 level = getLevel();
+        uint32 level = GetLevel();
         if (previousLevel < 20 && level >= 20)
         {
             ChatHandler(this).HandleAddItemCommandInternal("18160", true);
@@ -22426,6 +22381,8 @@ void Player::LearnSpellsWhenLevelup(uint32 previousLevel)
     {
         LearnAllGreenSpells(i);
     }
+}
+
 bool Player::IsAtRecruitAFriendDistance(WorldObject const* other) const
 {
     if (!other || !IsInMap(other))

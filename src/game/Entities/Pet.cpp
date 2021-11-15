@@ -786,7 +786,7 @@ void Pet::UpdateRequireXpForNextLoyaltyLevel(uint32 xp)
         Unit* owner = GetOwner();
         if (owner)
         {
-            if (owner->getLevel() == getLevel())
+            if (owner->GetLevel() == GetLevel())
             {
                 m_xpRequiredForNextLoyaltyLevel = 0;
             }

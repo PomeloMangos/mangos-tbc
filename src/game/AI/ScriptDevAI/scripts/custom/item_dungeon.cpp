@@ -10,7 +10,6 @@
 #include "Pomelo/DBConfigMgr.h"
 #include "Pomelo/CustomCurrencyMgr.h"
 #include "AI/ScriptDevAI/include/sc_gossip.h"
-#include "AI/ScriptDevAI/include/precompiled.h"
 #include "Tools/Language.h"
 
 #define ADVANCED_DIFFICULTY_COUNT 2
@@ -18,7 +17,7 @@
 void GenerateDungeonGossipMenu(Player* pPlayer, ObjectGuid guid)
 {
 	// Clear menu
-	pPlayer->PlayerTalkClass->ClearMenus();
+	pPlayer->GetPlayerMenu()->ClearMenus();
 
     for (uint8 i = 0; i < ADVANCED_DIFFICULTY_COUNT; ++i)
     {
@@ -42,7 +41,7 @@ bool HandleDungeonGossipMenuSelect(Player* pPlayer, Object* pObj, uint32 sender,
     if (pPlayer->GetMap()->IsDungeon() || pPlayer->GetMap()->IsRaid())
     {
         pPlayer->GetSession()->SendNotification(LANG_DIFFICULTY_WRONG_MAP);
-        pPlayer->PlayerTalkClass->CloseGossip();
+        pPlayer->GetPlayerMenu()->CloseGossip();
         return true;
     }
 
@@ -52,7 +51,7 @@ bool HandleDungeonGossipMenuSelect(Player* pPlayer, Object* pObj, uint32 sender,
         if (!pGroup->IsLeader(pPlayer->GetObjectGuid()))
         {
 		    pPlayer->GetSession()->SendNotification(LANG_POMELO_DIFFICULTY_NEED_GLEADER);
-		    pPlayer->PlayerTalkClass->CloseGossip();
+		    pPlayer->GetPlayerMenu()->CloseGossip();
             return true;
         }
         pGroup->SetAdvancedDifficulty(AdvancedDifficulty(action));
@@ -66,6 +65,6 @@ bool HandleDungeonGossipMenuSelect(Player* pPlayer, Object* pObj, uint32 sender,
             pPlayer->GetSession()->GetMangosString(LANG_POMELO_DIFFICULTY_NORMAL + action));
     }
 
-	pPlayer->PlayerTalkClass->CloseGossip();
+	pPlayer->GetPlayerMenu()->CloseGossip();
     return true;
 }

@@ -3262,7 +3262,7 @@ SpellCastResult Spell::cast(bool skipCheck)
     if (m_spellInfo->Id == 75 && m_caster->IsPlayer() && ((Player*)m_caster)->IsPendingSteadyShot())
     {
         Unit* target = m_targets.getUnitTarget();
-        if (target && target->isAlive())
+        if (target && target->IsAlive())
             m_caster->CastSpell(target, 34120, TRIGGERED_IGNORE_GCD);
 
         ((Player*)m_caster)->SetPendingSteadyShot(false);
@@ -8107,10 +8107,6 @@ SpellCastResult Spell::OnCheckCast(bool strict)
                 if (target.GetEntry() != 22181)
                     return SPELL_FAILED_BAD_TARGETS;
             break;
-        case 37390: // Oscillating Frequency Scanner
-            if (m_caster->HasAura(37407))
-                return SPELL_FAILED_NOT_HERE;
-            break;
         case 34120:
             // If auto shot is currently in its prepare fire stage, we need to delay
             // steady shot, but still consume GCD
@@ -8123,19 +8119,6 @@ SpellCastResult Spell::OnCheckCast(bool strict)
                 return SPELL_FAILED_DONT_REPORT;
             }
             break;
-        case 27230: // Health Stone
-        case 11730:
-        case 11729:
-        case 6202:
-        case 6201:
-        case 5699:
-        {
-            // check if we already have a healthstone
-            uint32 itemType = GetUsableHealthStoneItemType(m_caster);
-            if (itemType && m_caster->IsPlayer() && ((Player*)m_caster)->GetItemCount(itemType) > 0)
-                return SPELL_FAILED_TOO_MANY_OF_ITEM;
-            break;
-        }
         case 43732: // Remove Amani Curse - should only be usable on Forest Frog
             if (ObjectGuid target = m_targets.getUnitTargetGuid())
                 if (target.GetEntry() != 24396)

@@ -7,7 +7,6 @@
  **/
 
 #include "AI/ScriptDevAI/include/sc_gossip.h"
-#include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/include/sc_item_teleport.h"
 #include "Tools/Language.h"
 #include "Pomelo/CustomCurrencyMgr.h"
@@ -53,10 +52,10 @@ void AddFilteredGossipMenuForPlayer(uint32 menu_id, Player* pPlayer, ObjectGuid 
 
 bool DetectAttacks(Player* pPlayer)
 {
-    if (pPlayer->isInCombat())
+    if (pPlayer->IsInCombat())
     {
         pPlayer->GetSession()->SendNotification(LANG_TELE_CANNOT_USE_WHEN_ATTACK);
-        pPlayer->PlayerTalkClass->CloseGossip();
+        pPlayer->GetPlayerMenu()->CloseGossip();
         return true;
     }
 
@@ -66,7 +65,7 @@ bool DetectAttacks(Player* pPlayer)
 void GenerateGossipMenu(uint32 menu_id, Player* pPlayer, ObjectGuid guid)
 {
 	// Clear menu
-	pPlayer->PlayerTalkClass->ClearMenus();
+	pPlayer->GetPlayerMenu()->ClearMenus();
 
 	if (map_order[menu_id])
 	{
@@ -122,7 +121,7 @@ void LearnAllGreenClassSpells(Player* pPlayer, Creature* pCreature, size_t nonGr
         if (!pPlayer->IsSpellFitByClassAndRace(tSpell->learnedSpell, &reqLevel))
             continue;
 
-        if (tSpell->conditionId && !sObjectMgr.IsPlayerMeetToCondition(tSpell->conditionId, pPlayer, pCreature->GetMap(), pCreature, CONDITION_FROM_TRAINER))
+        if (tSpell->conditionId && !sObjectMgr.IsConditionSatisfied(tSpell->conditionId, pPlayer, pCreature->GetMap(), pCreature, CONDITION_FROM_TRAINER))
             continue;
 
         reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
@@ -149,15 +148,15 @@ bool CheckAndDoCost(Player* pPlayer, TELE_ITEM* pMenu)
 {
 	if (pPlayer->GetSession()->GetSecurity() < (AccountTypes)pMenu->permission_required)
 	{
-		pPlayer->PlayerTalkClass->CloseGossip();
+		pPlayer->GetPlayerMenu()->CloseGossip();
 		pPlayer->GetSession()->SendNotification(LANG_NO_PERMISSION_TO_USE);
 		return false;
 	}
 
 	// Level check
-	if (pPlayer->getLevel() < pMenu->level_required)
+	if (pPlayer->GetLevel() < pMenu->level_required)
 	{
-		pPlayer->PlayerTalkClass->CloseGossip();
+		pPlayer->GetPlayerMenu()->CloseGossip();
 		pPlayer->GetSession()->SendNotification(LANG_LEVEL_NOT_REACHED, pMenu->level_required);
 		return false;
 	}
@@ -168,7 +167,7 @@ bool CheckAndDoCost(Player* pPlayer, TELE_ITEM* pMenu)
 		if (pPlayer->GetMoney() < pMenu->cost_amount)
 		{
 			pPlayer->GetSession()->SendNotification(LANG_TELE_NO_MONEY_TO_USE);
-			pPlayer->PlayerTalkClass->CloseGossip();
+			pPlayer->GetPlayerMenu()->CloseGossip();
 		}
 		else
 		{
@@ -181,7 +180,7 @@ bool CheckAndDoCost(Player* pPlayer, TELE_ITEM* pMenu)
 		const char* currency_name = sCustomCurrencyMgr.GetCurrencyInfo(pMenu->cost_currency_id)->name.c_str();
 		if (pMenu->cost_amount > balance)
 		{
-			pPlayer->PlayerTalkClass->CloseGossip();
+			pPlayer->GetPlayerMenu()->CloseGossip();
 			pPlayer->GetSession()->SendNotification(
 				LANG_TELE_STORE_NO_CURRENCY_TO_BUY,
 				pMenu->cost_amount,
@@ -274,7 +273,7 @@ bool GossipSelect(Player* pPlayer, Object* pObj, uint32 sender, uint32 action)
 
 		// Teleport
 		TeleportTo(pPlayer, item.teleport_map, item.teleport_x, item.teleport_y, item.teleport_z, 0);
-		pPlayer->PlayerTalkClass->CloseGossip();
+		pPlayer->GetPlayerMenu()->CloseGossip();
 		break;
 	case TELE_FUNC::STORE:
 		Creature* pStoreNpc;
@@ -291,7 +290,7 @@ bool GossipSelect(Player* pPlayer, Object* pObj, uint32 sender, uint32 action)
         Creature* pTrainNpc;
         pTrainNpc = pPlayer->SummonCreature(item.trigger_menu, pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ(), 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 10000);
         LearnAllGreenClassSpells(pPlayer, pTrainNpc);
-        pPlayer->PlayerTalkClass->CloseGossip();
+        pPlayer->GetPlayerMenu()->CloseGossip();
         break;
     case TELE_FUNC::TRAIN_CLASS:
 		// Check level, permission, currencies
@@ -312,11 +311,11 @@ bool GossipSelect(Player* pPlayer, Object* pObj, uint32 sender, uint32 action)
 		}
         pTrainClassNpc = pPlayer->SummonCreature(npcId, pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ(), 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 10000);
         LearnAllGreenClassSpells(pPlayer, pTrainClassNpc);
-        pPlayer->PlayerTalkClass->CloseGossip();
+        pPlayer->GetPlayerMenu()->CloseGossip();
         break;
 	case TELE_FUNC::BANK:
 		pPlayer->GetSession()->SendShowBank(pObj->GetObjectGuid());
-		pPlayer->PlayerTalkClass->CloseGossip();
+		pPlayer->GetPlayerMenu()->CloseGossip();
 		break;
 	case TELE_FUNC::QUERY_CURRENCY:
 		currencies = pPlayer->GetOwnedCustomCurrencies();
@@ -335,7 +334,7 @@ bool GossipSelect(Player* pPlayer, Object* pObj, uint32 sender, uint32 action)
 			}
 		}
 
-		pPlayer->PlayerTalkClass->CloseGossip();
+		pPlayer->GetPlayerMenu()->CloseGossip();
 		break;
 	case TELE_FUNC::TRANSMOGRIFY_MENU:
 		GenerateTransmogrificationGossipMenu(pPlayer, pObj->GetObjectGuid());
@@ -358,12 +357,12 @@ bool GossipSelect(Player* pPlayer, Object* pObj, uint32 sender, uint32 action)
 				LANG_CLAIM_DAILY_REWARD_OK,
 				sCustomCurrencyMgr.GetCurrencyInfo(currencyId)->name.c_str(),
 				amount);
-            pPlayer->PlayerTalkClass->CloseGossip();
+            pPlayer->GetPlayerMenu()->CloseGossip();
 		}
 		else
 		{
             pPlayer->GetSession()->SendNotification(LANG_CLAIM_DAILY_REWARD_FAIL);
-            pPlayer->PlayerTalkClass->CloseGossip();
+            pPlayer->GetPlayerMenu()->CloseGossip();
 		}
 
 		break;
@@ -374,14 +373,14 @@ bool GossipSelect(Player* pPlayer, Object* pObj, uint32 sender, uint32 action)
 			return true;
 		}
 		pPlayer->UpdateSkillsForLevel(true);
-        pPlayer->PlayerTalkClass->CloseGossip();
+        pPlayer->GetPlayerMenu()->CloseGossip();
 		break;
     case TELE_FUNC::BUY_TIER_THREE:
         // Check empty slots
         if (pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, STORE_ITEM_ENTRY, 9) != EQUIP_ERR_OK)
         {
             pPlayer->GetSession()->SendNotification(LANG_MUST_LEAVE_9_SLOTS);
-            pPlayer->PlayerTalkClass->CloseGossip();
+            pPlayer->GetPlayerMenu()->CloseGossip();
             return true;
         }
 
@@ -391,7 +390,7 @@ bool GossipSelect(Player* pPlayer, Object* pObj, uint32 sender, uint32 action)
         }
 
         ChatHandler(pPlayer).HandleAddItemSetCommandInternal(t3_itemset[pPlayer->getClass()], true);
-        pPlayer->PlayerTalkClass->CloseGossip();
+        pPlayer->GetPlayerMenu()->CloseGossip();
         break;
 	case TELE_FUNC::DUNGEON_SETTINGS:
 		GenerateDungeonGossipMenu(pPlayer, pObj->GetObjectGuid());

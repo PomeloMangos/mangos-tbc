@@ -6,13 +6,10 @@
  *
  **/
 
-#include "AI/ScriptDevAI/include/precompiled.h"
 #include "Tools/Language.h"
 #include "Pomelo/DBConfigMgr.h"
 #include "Chat/Chat.h"
 #include "World/World.h"
-
-using namespace Teleport;
 
 bool TradeSkillItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
 {

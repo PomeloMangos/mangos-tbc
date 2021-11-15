@@ -30,8 +30,8 @@ Channel::Channel(const std::string& name, uint32 channel_id/* = 0*/)
 	m_origin_name = m_name;
 
     // set special flags if built-in channel
-    ChatChannelsEntry const* ch = GetChannelEntryFor(channel_id);
-    if (ch)                                                 // it's built-in channel
+    ChatChannelsEntry const* builtin = GetChatChannelsEntryFor(m_name, channel_id);
+    if (builtin)                                                 // it's built-in channel
     {
         m_entry = builtin;                                              // built-in channel entry
         m_announcements = false;                                        // no join/leave announcements by default
@@ -49,7 +49,7 @@ Channel::Channel(const std::string& name, uint32 channel_id/* = 0*/)
             m_flags |= CHANNEL_FLAG_NOT_LFG;
 		
 		// Override trade channel name into global channel
-		if (sWorld.getConfig(CONFIG_BOOL_OVERRIDE_TRADE_CHANNEL) && ch->flags & CHANNEL_DBC_FLAG_TRADE)
+		if (sWorld.getConfig(CONFIG_BOOL_OVERRIDE_TRADE_CHANNEL) && builtin->flags & CHANNEL_DBC_FLAG_TRADE)
 		{
 			const char* channel_name = sObjectMgr.GetMangosString(LANG_WORLD_CHANNEL_NAME, 0);
 			m_name = std::string(channel_name);
@@ -680,13 +680,13 @@ void Channel::Say(Player* player, const char* text, uint32 lang)
 
 	const char* channel_name = m_name.c_str();
     ChatHandler::BuildChatPacket(data, CHAT_MSG_CHANNEL, text, Language(lang), player->GetChatTag(), guid, player->GetName(), ObjectGuid(), "", channel_name);
-    SendToAll(data, !m_players[guid].IsModerator() ? guid : ObjectGuid());
+    SendToAll(data);
 
 	if (IsTrade() && sWorld.getConfig(CONFIG_BOOL_OVERRIDE_TRADE_CHANNEL))
 	{
 		channel_name = m_origin_name.c_str();
 		ChatHandler::BuildChatPacket(data, CHAT_MSG_CHANNEL, text, Language(lang), player->GetChatTag(), guid, player->GetName(), ObjectGuid(), "", channel_name);
-		SendToAll(data, !m_players[guid].IsModerator() ? guid : ObjectGuid());
+		SendToAll(data);
 	}
 }
 

@@ -1,5 +1,3 @@
-#include "AI/ScriptDevAI/include/precompiled.h"
-
 enum
 {
     // List of text id's. The text is stored in database, also in a localized version
