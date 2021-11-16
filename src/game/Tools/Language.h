@@ -1155,6 +1155,7 @@ enum MangosStrings
     LANG_CHEATER_DIED                   = 80064,
     LANG_CHEATER_NO_ACTION              = 80065,
     LANG_ANNOUNCE_ON_SUPPORT            = 80066,
+    LANG_WCL_LACK_OF_SLOT               = 80067,
 
     // Use for custom patches             11000-11999
 

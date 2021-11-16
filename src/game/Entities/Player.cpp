@@ -72,6 +72,7 @@
 #include "Pomelo/VendorItemBlacklistMgr.h"
 #include "Pomelo/OnlineRewardMgr.h"
 #include "Pomelo/AntiCheatMgr.h"
+#include "Pomelo/WclItemMgr.h"
 #include "Globals/ObjectMgr.h"
 #include "Anticheat/Anticheat.hpp"
 
@@ -15622,6 +15623,9 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     _LoadDeclinedNames(holder->GetResult(PLAYER_LOGIN_QUERY_LOADDECLINEDNAMES));
 
     _LoadCreatedInstanceTimers();
+
+    // Pomelo: Sync WCL items
+    sWclItemMgr.SyncItemsForUser(this);
 
     return true;
 }

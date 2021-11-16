@@ -18,7 +18,7 @@ void AnnounceMgr::LoadFromDB()
     QueryResult* result = LoginDatabase.PQuery(
         "SELECT `text` "
         "FROM `pomelo_announce`"
-        "ORDER BY `priority DESC`; ");
+        "ORDER BY `priority` DESC; ");
 
     if (result)
 	{
